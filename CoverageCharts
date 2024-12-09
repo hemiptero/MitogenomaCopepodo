@@ -1,0 +1,75 @@
+if (!require("gridExtra")) install.packages("gridExtra")
+library(gridExtra)
+
+svg("Coverage.svg", width = 8, height = 12)
+
+# Función para leer un archivo CSV y calcular estadísticas
+calcular_estadisticas <- function(nombre_archivo) {
+  datos <- read.csv(nombre_archivo, header = TRUE)
+
+  # Calcular estadísticas
+  minimo <- min(datos$Coverage)
+  maximo <- max(datos$Coverage)
+  media <- mean(datos$Coverage)
+  desviacion <- sd(datos$Coverage)
+
+  # Crear una lista con las estadísticas
+  estadisticas <- list(
+    minimo = minimo,
+    maximo = maximo,
+    media = media,
+    desviacion = desviacion
+  )
+
+  return(estadisticas)
+}
+
+# Lista de nombres de archivos
+nombres_archivos <- c(
+  "garciai.csv",
+  "Atexcac_Illumina.csv",
+  "Atexcac_Pacbio.csv",
+  "Carmen.csv",
+  "PreciosaJunctionsSolved.csv",
+  "Quechulac.csv"
+)
+
+# Nombres para mostrar en la salida
+nombres_mostrar <- c("ALC", "ATX_Illumina", "Atexcac_Pacbio", "CAR", "PRE", "QUE")
+
+# Iterar sobre la lista de archivos
+for (i in 1:length(nombres_archivos)) {
+  estadisticas <- calcular_estadisticas(nombres_archivos[i])
+
+  # Imprimir resultados
+  print(nombres_mostrar[i])
+  print(paste("Mínimo:", estadisticas$minimo))
+  print(paste("Máximo:", estadisticas$maximo))
+  print(paste("Media:", estadisticas$media))
+  print(paste("Desviación estándar:", estadisticas$desviacion))
+  cat("\n")  # Imprimir una línea en blanco para separar los resultados
+}
+
+# Función para crear un gráfico con área bajo la curva rellena
+crear_grafico <- function(datos, titulo) {
+  ggplot(datos, aes(x = Position, y = Coverage)) +
+    geom_area(fill = "black") +  # Cambiar geom_line() por geom_area()
+    labs(title = titulo,) +
+    theme_bw()
+}
+
+
+grafico_ALC <- crear_grafico(ALC, "L. garciai")
+grafico_ATI <- crear_grafico(ATI, "L. 'Atexcac' (Illumina)")
+grafico_ATP <- crear_grafico(ATP, "L. 'Atexcac' (PacBio)")
+grafico_CAR <- crear_grafico(CAR, "L. 'Carmen' (Illumina)")
+grafico_PRE <- crear_grafico(PRE, "L. 'Preciosa' (Illumina)")
+grafico_QUE <- crear_grafico(QUE, "L. 'Quechulac' (Illumina)")
+
+# Organizar los gráficos verticalmente
+grid.arrange(grafico_ALC, grafico_ATI, grafico_ATP,
+             grafico_CAR, grafico_PRE, grafico_QUE, ncol = 1)
+
+dev.off()
+
+
